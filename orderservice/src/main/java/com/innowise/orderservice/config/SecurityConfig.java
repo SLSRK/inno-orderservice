@@ -30,7 +30,6 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/public/**"
                         ).permitAll()
-                        //.requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler((request, response, ex) -> {

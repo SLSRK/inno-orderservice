@@ -37,6 +37,7 @@ public class GlobalException {
 
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<Map<String, String>> handleAccessDenied(AuthorizationDeniedException ex) {
+        log.info("Access denied: {}", ex.getMessage());
 
         Map<String, String> error = new HashMap<>();
         error.put("error", "Access Denied");
@@ -47,6 +48,7 @@ public class GlobalException {
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public ResponseEntity<Map<String, String>>
     handleAuthenticationCredentialsNotFound(AuthenticationCredentialsNotFoundException ex) {
+        log.info("Not authenticated: {}", ex.getMessage());
 
         Map<String, String> error = new HashMap<>();
         error.put("error", "Authentication required");
@@ -56,7 +58,7 @@ public class GlobalException {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleOther(Exception ex) {
-        log.warn("Internal server error: {}", ex.getMessage());
+        log.info("Internal server error: {}", ex.getMessage());
 
         Map<String, String> error = new HashMap<>();
         error.put("error", "Internal Server Error: " + ex.getMessage());

@@ -1,6 +1,7 @@
 package com.innowise.orderservice.client;
 
 import com.innowise.orderservice.model.dto.UserResponseDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -15,6 +16,7 @@ public class UserClient {
 
     private final RestTemplate restTemplate;
 
+    @CircuitBreaker(name = "userService", fallbackMethod = "getUserByIdFallback")
     public UserResponseDto getUserById(Long id) {
         return restTemplate.getForObject(
                 "/api/users/{id}",
@@ -23,6 +25,7 @@ public class UserClient {
         );
     }
 
+    @CircuitBreaker(name = "userService", fallbackMethod = "getUsersByIdsFallback")
     public List<UserResponseDto> getUsersByIds(List<Long> ids) {
         String idsParam = ids.stream()
                 .map(String::valueOf)
@@ -33,11 +36,24 @@ public class UserClient {
                 idsParam).getBody());
     }
 
+    @CircuitBreaker(name = "userService", fallbackMethod = "getUserByEmailFallback")
     public UserResponseDto getUserByEmail(String email) {
         return restTemplate.getForObject(
                 "/api/users/email/{email}",
                 UserResponseDto.class,
                 email
         );
+    }
+
+    private UserResponseDto getUserByIdFallback(Long id, Throwable throwable) {
+        throw new RuntimeException("UserService is unavailable", throwable);
+    }
+
+    private List<UserResponseDto> getUsersByIdsFallback(List<Long> ids, Throwable throwable) {
+        throw new RuntimeException("UserService is unavailable", throwable);
+    }
+
+    private UserResponseDto getUserByEmailFallback(String email, Throwable throwable) {
+        throw new RuntimeException("UserService is unavailable", throwable);
     }
 }

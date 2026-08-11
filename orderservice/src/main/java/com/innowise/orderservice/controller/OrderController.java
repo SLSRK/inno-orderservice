@@ -34,7 +34,7 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('ADMIN') or and orderCreateDto.userId == authentication.principal)")
+    @PreAuthorize("hasAuthority('ADMIN') or #orderCreateDto.userId == authentication.principal")
     public OrderResponseDto createOrder(@Valid @RequestBody OrderCreateDto orderCreateDto) {
         return orderService.createOrder(orderCreateDto);
     }

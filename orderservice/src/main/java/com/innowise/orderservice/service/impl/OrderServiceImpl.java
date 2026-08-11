@@ -18,6 +18,8 @@ import com.innowise.orderservice.service.OrderService;
 import com.innowise.orderservice.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserClient userClient;
 
     @Transactional
+    @CacheEvict(value = "orders", allEntries = true)
     public OrderResponseDto createOrder(OrderCreateDto orderCreateDto) {
         log.debug("Creating a new order with the user id={} with {} items",
                 orderCreateDto.userId(),
@@ -57,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
         return mapResponseWithUser(orderResponseDto, userResponseDto);
     }
 
+    @Cacheable(value = "orders", key = "#id")
     public OrderResponseDto getOrderById(Long id) {
         Order order = orderRepository.findByIdAndDeletedFalse(id)
                         .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -110,17 +114,20 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
+    @Cacheable(value = "orders", key = "'user:' + #userId")
     public List<OrderResponseDto> getOrdersByUserId(Long userId) {
         UserResponseDto userResponseDto = userClient.getUserById(userId);
         return getOrdersByUser(userResponseDto);
     }
 
+    @Cacheable(value = "orders", key = "'email:' + #email")
     public List<OrderResponseDto> getOrdersByUserEmail(String email) {
         UserResponseDto userResponseDto = userClient.getUserByEmail(email);
         return getOrdersByUser(userResponseDto);
     }
 
     @Transactional
+    @CacheEvict(value = "orders", allEntries = true)
     public OrderResponseDto updateOrderById(Long id, OrderUpdateDto orderUpdateDto) {
         log.debug("Updating the order with the id={}, with user id={}, status={} and {} items",
                 id,
@@ -146,6 +153,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "orders", allEntries = true)
     public OrderResponseDto deleteOrderById(Long id) {
         log.debug("Deleting the order with the ud={}", id);
         Order order = orderRepository.findByIdAndDeletedFalse(id)

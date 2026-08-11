@@ -1,0 +1,54 @@
+services:
+
+  orderservice:
+    build: ./orderservice
+    container_name: orderservice
+    ports:
+      - "8083:8080"
+    networks:
+      - app-network
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_REDIS_HOST: ${REDIS_HOST}
+      SPRING_REDIS_PORT: ${REDIS_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      USERSERVICE_URL: ${USERSERVICE_URL}
+    depends_on:
+      - order-db
+      - redis
+
+  order-db:
+    image: postgres:16
+    container_name: orderservice_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: orderservice_redis
+    restart: always
+    ports:
+      - "6380:6379"
+    networks:
+      - app-network
+
+volumes:
+  order_db_data:
+
+networks:
+  app-network:
+    external: true

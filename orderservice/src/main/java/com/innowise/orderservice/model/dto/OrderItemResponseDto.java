@@ -2,15 +2,15 @@ package com.innowise.orderservice.model.dto;
 
 import java.time.LocalDateTime;
 
-public record ItemResponseDto(
+public record OrderItemResponseDto(
 
         Long id,
 
-        String name,
+        Long orderId,
 
-        String price,
+        ItemResponseDto item,
 
-        Boolean deleted,
+        Long quantity,
 
         LocalDateTime createdAt,
 

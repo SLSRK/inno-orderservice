@@ -197,17 +197,17 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderResponseDto mapResponseWithUser(OrderResponseDto orderResponseDto,
                                                  UserResponseDto userResponseDto) {
-        return new OrderResponseDto(
-                orderResponseDto.id(),
-                orderResponseDto.userId(),
-                orderResponseDto.status(),
-                orderResponseDto.totalPrice(),
-                orderResponseDto.deleted(),
-                orderResponseDto.createdAt(),
-                orderResponseDto.updatedAt(),
-                orderResponseDto.orderItems(),
-                userResponseDto
-        );
+        return OrderResponseDto.builder()
+                .id(orderResponseDto.id())
+                .userId(orderResponseDto.userId())
+                .status(orderResponseDto.status())
+                .totalPrice(orderResponseDto.totalPrice())
+                .deleted(orderResponseDto.deleted())
+                .createdAt(orderResponseDto.createdAt())
+                .updatedAt(orderResponseDto.updatedAt())
+                .orderItems(orderResponseDto.orderItems())
+                .user(userResponseDto)
+                .build();
     }
 
     private List<OrderResponseDto> getOrdersByUser(UserResponseDto userResponseDto) {

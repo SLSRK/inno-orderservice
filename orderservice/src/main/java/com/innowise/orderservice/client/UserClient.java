@@ -1,5 +1,7 @@
 package com.innowise.orderservice.client;
 
+import com.innowise.orderservice.exception.ForeignServiceException;
+import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.UserResponseDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -46,14 +48,34 @@ public class UserClient {
     }
 
     private UserResponseDto getUserByIdFallback(Long id, Throwable throwable) {
-        throw new RuntimeException("UserService is unavailable", throwable);
+        return new UserResponseDto(
+                id,
+                "Unknown",
+                "Unknown",
+                null,
+                null,
+                "Unknown",
+                null,
+                null
+        );
     }
 
     private List<UserResponseDto> getUsersByIdsFallback(List<Long> ids, Throwable throwable) {
-        throw new RuntimeException("UserService is unavailable", throwable);
+        return ids.stream()
+                .map(id -> new UserResponseDto(
+                        id,
+                        "Unknown",
+                        "Unknown",
+                        null,
+                        null,
+                        "Unknown",
+                        null,
+                        null
+                ))
+                .toList();
     }
 
     private UserResponseDto getUserByEmailFallback(String email, Throwable throwable) {
-        throw new RuntimeException("UserService is unavailable", throwable);
+        throw new ForeignServiceException("UserService is unavailable", throwable);
     }
 }

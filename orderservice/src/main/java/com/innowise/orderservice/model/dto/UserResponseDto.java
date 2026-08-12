@@ -1,5 +1,6 @@
 package com.innowise.orderservice.model.dto;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,5 +21,6 @@ public record UserResponseDto(
         LocalDateTime createdAt,
 
         LocalDateTime updatedAt
-) {
+) implements Serializable {
+    private static final long serialVersionUID = 1L;
 }

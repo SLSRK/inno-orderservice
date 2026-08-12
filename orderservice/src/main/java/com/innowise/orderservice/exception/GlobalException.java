@@ -56,6 +56,17 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
+    @ExceptionHandler(ForeignServiceException.class)
+    public ResponseEntity<Map<String, String>>
+    handleAuthenticationCredentialsNotFound(ForeignServiceException ex) {
+        log.info("Service not available: {}", ex.getMessage());
+
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleOther(Exception ex) {
         log.info("Internal server error: {}", ex.getMessage());

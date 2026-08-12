@@ -16,15 +16,18 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 class OrderIntegrationTest extends IntegrationTestCommons {
 
+    private static final String NAME = "Widget";
     private static final Long USER_ID = 5L;
     private static final Long OTHER_USER_ID = 6L;
     private static final Long NON_EXISTENT_ID = 999_999_999L;
+    private static final String REF = "/api/orders";
+    private static final String REF_W_ID ="/api/orders/{id}";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void createOrder_shouldReturnCreatedOrder_whenAdmin() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         mockUser(USER_ID);
 
         String body = """
@@ -36,7 +39,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(USER_ID, itemId);
 
-        mockMvc.perform(post("/api/orders")
+        mockMvc.perform(post(REF)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -47,7 +50,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void createOrder_shouldReturnCreatedOrder_whenOwnerCreatesForSelf() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         mockUser(USER_ID);
 
         String body = """
@@ -59,7 +62,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(USER_ID, itemId);
 
-        mockMvc.perform(post("/api/orders")
+        mockMvc.perform(post(REF)
                         .with(user(USER_ID))
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -68,7 +71,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void createOrder_shouldReturnForbidden_whenCreatingForAnotherUser() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         mockUser(OTHER_USER_ID);
 
         String body = """
@@ -80,7 +83,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(OTHER_USER_ID, itemId);
 
-        mockMvc.perform(post("/api/orders")
+        mockMvc.perform(post(REF)
                         .with(user(USER_ID))
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -100,7 +103,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(USER_ID, NON_EXISTENT_ID);
 
-        mockMvc.perform(post("/api/orders")
+        mockMvc.perform(post(REF)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -109,60 +112,60 @@ class OrderIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void getOrderById_shouldReturnOrder_whenAdmin() throws Exception {
-        Long orderId = createOrder(USER_ID, createItem("Widget", 500L), 2L);
+        Long orderId = createOrder(USER_ID, createItem(NAME, 500L), 2L);
 
-        mockMvc.perform(get("/api/orders/{id}", orderId).with(admin()))
+        mockMvc.perform(get(REF_W_ID, orderId).with(admin()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(orderId));
     }
 
     @Test
     void getOrderById_shouldReturnNotFound_whenDoesNotExist() throws Exception {
-        mockMvc.perform(get("/api/orders/{id}", NON_EXISTENT_ID).with(admin()))
+        mockMvc.perform(get(REF_W_ID, NON_EXISTENT_ID).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void getOrderById_shouldReturnForbidden_whenNotOwnerAndNotAdmin() throws Exception {
-        Long orderId = createOrder(USER_ID, createItem("Widget", 500L), 1L);
+        Long orderId = createOrder(USER_ID, createItem(NAME, 500L), 1L);
 
-        mockMvc.perform(get("/api/orders/{id}", orderId).with(user(OTHER_USER_ID)))
+        mockMvc.perform(get(REF_W_ID, orderId).with(user(OTHER_USER_ID)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void getAllOrders_shouldReturnForbidden_whenNotAdmin() throws Exception {
-        mockMvc.perform(get("/api/orders").with(user(USER_ID)))
+        mockMvc.perform(get(REF).with(user(USER_ID)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void getAllOrders_shouldReturnPageOfOrders() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         createOrder(USER_ID, itemId, 1L);
 
         UserResponseDto userDto = mockUser(USER_ID);
         mockUsers(List.of(userDto));
 
-        mockMvc.perform(get("/api/orders").with(admin()))
+        mockMvc.perform(get(REF).with(admin()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     @Test
     void getOrdersByUserId_shouldReturnOwnOrders() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         createOrder(USER_ID, itemId, 1L);
         mockUser(USER_ID);
 
-        mockMvc.perform(get("/api/orders/user/{userId}", USER_ID).with(user(USER_ID)))
+        mockMvc.perform(get(REF + "/user/{userId}", USER_ID).with(user(USER_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test
     void getOrdersByUserId_shouldReturnForbidden_whenRequestingAnotherUsersOrders() throws Exception {
-        mockMvc.perform(get("/api/orders/user/{userId}", OTHER_USER_ID).with(user(USER_ID)))
+        mockMvc.perform(get(REF + "/user/{userId}", OTHER_USER_ID).with(user(USER_ID)))
                 .andExpect(status().isForbidden());
     }
 
@@ -170,19 +173,19 @@ class OrderIntegrationTest extends IntegrationTestCommons {
     void getOrdersByUserId_shouldReturnNotFound_whenNoOrders() throws Exception {
         mockUser(USER_ID);
 
-        mockMvc.perform(get("/api/orders/user/{userId}", USER_ID).with(admin()))
+        mockMvc.perform(get(REF + "/user/{userId}", USER_ID).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void getOrdersByUserEmail_shouldReturnForbidden_whenNotAdmin() throws Exception {
-        mockMvc.perform(get("/api/orders/email/{email}", "ivan@test.com").with(user(USER_ID)))
+        mockMvc.perform(get(REF + "/email/{email}", "ivan@test.com").with(user(USER_ID)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void updateOrderById_shouldUpdateStatusAndItems() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         Long orderId = createOrder(USER_ID, itemId, 1L);
         mockUser(USER_ID);
 
@@ -196,7 +199,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(USER_ID, itemId);
 
-        mockMvc.perform(put("/api/orders/{id}", orderId)
+        mockMvc.perform(put(REF_W_ID, orderId)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -206,7 +209,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void updateOrderById_shouldReturnForbidden_whenNotAdmin() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         Long orderId = createOrder(USER_ID, itemId, 1L);
         mockUser(USER_ID);
 
@@ -220,7 +223,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(USER_ID, itemId);
 
-        mockMvc.perform(put("/api/orders/{id}", orderId)
+        mockMvc.perform(put(REF_W_ID, orderId)
                         .with(user(USER_ID))
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -229,7 +232,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void updateOrderById_shouldReturnNotFound_whenOrderDoesNotExist() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         mockUser(USER_ID);
 
         String body = """
@@ -242,7 +245,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(USER_ID, itemId);
 
-        mockMvc.perform(put("/api/orders/{id}", NON_EXISTENT_ID)
+        mockMvc.perform(put(REF_W_ID, NON_EXISTENT_ID)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -251,29 +254,29 @@ class OrderIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void deleteOrderById_shouldMarkOrderDeleted() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         Long orderId = createOrder(USER_ID, itemId, 1L);
         mockUser(USER_ID);
 
-        mockMvc.perform(delete("/api/orders/{id}", orderId).with(admin()))
+        mockMvc.perform(delete(REF_W_ID, orderId).with(admin()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/orders/{id}", orderId).with(admin()))
+        mockMvc.perform(get(REF_W_ID, orderId).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void deleteOrderById_shouldReturnForbidden_whenNotOwnerAndNotAdmin() throws Exception {
-        Long itemId = createItem("Widget", 500L);
+        Long itemId = createItem(NAME, 500L);
         Long orderId = createOrder(USER_ID, itemId, 1L);
 
-        mockMvc.perform(delete("/api/orders/{id}", orderId).with(user(OTHER_USER_ID)))
+        mockMvc.perform(delete(REF_W_ID, orderId).with(user(OTHER_USER_ID)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void deleteOrderById_shouldReturnNotFound_whenDoesNotExist() throws Exception {
-        mockMvc.perform(delete("/api/orders/{id}", NON_EXISTENT_ID).with(admin()))
+        mockMvc.perform(delete(REF_W_ID, NON_EXISTENT_ID).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
@@ -308,7 +311,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(userId, itemId, quantity);
 
-        String response = mockMvc.perform(post("/api/orders")
+        String response = mockMvc.perform(post(REF)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))

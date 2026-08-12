@@ -31,7 +31,7 @@ public class UserClient {
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
         return Arrays.asList(restTemplate.getForEntity(
-                "/api/users/batch/{ids}",
+                "/api/users/batch?ids={ids}",
                 UserResponseDto[].class,
                 idsParam).getBody());
     }

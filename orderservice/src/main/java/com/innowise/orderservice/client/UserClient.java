@@ -1,7 +1,6 @@
 package com.innowise.orderservice.client;
 
 import com.innowise.orderservice.exception.ForeignServiceException;
-import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.UserResponseDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +16,8 @@ import java.util.stream.Collectors;
 public class UserClient {
 
     private final RestTemplate restTemplate;
+
+    private static final String UNKNOWN = "Unknown";
 
     @CircuitBreaker(name = "userService", fallbackMethod = "getUserByIdFallback")
     public UserResponseDto getUserById(Long id) {
@@ -50,11 +51,11 @@ public class UserClient {
     private UserResponseDto getUserByIdFallback(Long id, Throwable throwable) {
         return new UserResponseDto(
                 id,
-                "Unknown",
-                "Unknown",
+                UNKNOWN,
+                UNKNOWN,
                 null,
                 null,
-                "Unknown",
+                UNKNOWN,
                 null,
                 null
         );
@@ -64,11 +65,11 @@ public class UserClient {
         return ids.stream()
                 .map(id -> new UserResponseDto(
                         id,
-                        "Unknown",
-                        "Unknown",
+                        UNKNOWN,
+                        UNKNOWN,
                         null,
                         null,
-                        "Unknown",
+                        UNKNOWN,
                         null,
                         null
                 ))

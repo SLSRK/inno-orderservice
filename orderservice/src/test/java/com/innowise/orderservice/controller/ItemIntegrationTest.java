@@ -18,8 +18,8 @@ class ItemIntegrationTest extends IntegrationTestCommons {
     private static final Long PRICE_IN_CENTS = 1_999L;
     private static final Long NEW_PRICE_IN_CENTS = 2_999L;
     private static final Long NON_EXISTENT_ID = 999_999_999L;
-    private static final String REF = "/api/items";
-    private static final String REF_W_ID = "/api/items/{id}";
+    private static final String REF = "/api/v1/items";
+    private static final String REF_W_ID = "/api/v1/items/{id}";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

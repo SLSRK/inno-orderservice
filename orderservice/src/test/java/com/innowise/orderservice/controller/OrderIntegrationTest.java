@@ -20,8 +20,8 @@ class OrderIntegrationTest extends IntegrationTestCommons {
     private static final Long USER_ID = 5L;
     private static final Long OTHER_USER_ID = 6L;
     private static final Long NON_EXISTENT_ID = 999_999_999L;
-    private static final String REF = "/api/orders";
-    private static final String REF_W_ID ="/api/orders/{id}";
+    private static final String REF = "/api/v1/orders";
+    private static final String REF_W_ID ="/api/v1/orders/{id}";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -288,7 +288,7 @@ class OrderIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(name, priceInCents);
 
-        String response = mockMvc.perform(post("/api/items")
+        String response = mockMvc.perform(post("/api/v1/items")
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))

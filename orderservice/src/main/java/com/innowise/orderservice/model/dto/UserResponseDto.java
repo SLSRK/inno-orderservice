@@ -1,9 +1,12 @@
 package com.innowise.orderservice.model.dto;
 
+import lombok.Builder;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Builder
 public record UserResponseDto(
 
         Long id,

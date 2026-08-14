@@ -17,12 +17,13 @@ public class UserClient {
 
     private final RestTemplate restTemplate;
 
+    private static final String REF = "/api/users";
     private static final String UNKNOWN = "Unknown";
 
     @CircuitBreaker(name = "userService", fallbackMethod = "getUserByIdFallback")
     public UserResponseDto getUserById(Long id) {
         return restTemplate.getForObject(
-                "/api/users/{id}",
+                REF + "/{id}",
                 UserResponseDto.class,
                 id
         );
@@ -34,7 +35,7 @@ public class UserClient {
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
         return Arrays.asList(restTemplate.getForEntity(
-                "/api/users/batch?ids={ids}",
+                REF + "/batch?ids={ids}",
                 UserResponseDto[].class,
                 idsParam).getBody());
     }
@@ -42,37 +43,29 @@ public class UserClient {
     @CircuitBreaker(name = "userService", fallbackMethod = "getUserByEmailFallback")
     public UserResponseDto getUserByEmail(String email) {
         return restTemplate.getForObject(
-                "/api/users/email/{email}",
+                REF + "/email/{email}",
                 UserResponseDto.class,
                 email
         );
     }
 
     private UserResponseDto getUserByIdFallback(Long id, Throwable throwable) {
-        return new UserResponseDto(
-                id,
-                UNKNOWN,
-                UNKNOWN,
-                null,
-                null,
-                UNKNOWN,
-                null,
-                null
-        );
+        return UserResponseDto.builder()
+                .id(id)
+                .name(UNKNOWN)
+                .surname(UNKNOWN)
+                .email(UNKNOWN)
+                .build();
     }
 
     private List<UserResponseDto> getUsersByIdsFallback(List<Long> ids, Throwable throwable) {
         return ids.stream()
-                .map(id -> new UserResponseDto(
-                        id,
-                        UNKNOWN,
-                        UNKNOWN,
-                        null,
-                        null,
-                        UNKNOWN,
-                        null,
-                        null
-                ))
+                .map(id -> UserResponseDto.builder()
+                        .id(id)
+                        .name(UNKNOWN)
+                        .surname(UNKNOWN)
+                        .email(UNKNOWN)
+                        .build())
                 .toList();
     }
 

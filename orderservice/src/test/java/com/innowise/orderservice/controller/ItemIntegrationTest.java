@@ -18,8 +18,8 @@ class ItemIntegrationTest extends IntegrationTestCommons {
     private static final Long PRICE_IN_CENTS = 1_999L;
     private static final Long NEW_PRICE_IN_CENTS = 2_999L;
     private static final Long NON_EXISTENT_ID = 999_999_999L;
-    private static final String REF = "/api/v1/items";
-    private static final String REF_W_ID = "/api/v1/items/{id}";
+    private static final String URI = "/api/v1/items";
+    private static final String URI_W_ID = "/api/v1/items/{id}";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -32,7 +32,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(NAME, PRICE_IN_CENTS);
 
-        mockMvc.perform(post(REF)
+        mockMvc.perform(post(URI)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -50,7 +50,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(PRICE_IN_CENTS);
 
-        mockMvc.perform(post(REF)
+        mockMvc.perform(post(URI)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -67,7 +67,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(NAME);
 
-        mockMvc.perform(post(REF)
+        mockMvc.perform(post(URI)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -84,7 +84,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(NAME, PRICE_IN_CENTS);
 
-        mockMvc.perform(post(REF)
+        mockMvc.perform(post(URI)
                         .with(user(2L))
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -95,7 +95,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
     void getItemById_shouldReturnItem_whenExists() throws Exception {
         Long itemId = createItem(NAME, PRICE_IN_CENTS);
 
-        mockMvc.perform(get(REF_W_ID, itemId).with(admin()))
+        mockMvc.perform(get(URI_W_ID, itemId).with(admin()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(itemId))
                 .andExpect(jsonPath("$.name").value(NAME));
@@ -103,7 +103,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
 
     @Test
     void getItemById_shouldReturnNotFound_whenDoesNotExist() throws Exception {
-        mockMvc.perform(get(REF_W_ID, NON_EXISTENT_ID).with(admin()))
+        mockMvc.perform(get(URI_W_ID, NON_EXISTENT_ID).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
@@ -111,7 +111,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
     void getItemById_shouldBeAccessibleByRegularUser() throws Exception {
         Long itemId = createItem(NAME, PRICE_IN_CENTS);
 
-        mockMvc.perform(get(REF_W_ID, itemId).with(user(2L)))
+        mockMvc.perform(get(URI_W_ID, itemId).with(user(2L)))
                 .andExpect(status().isOk());
     }
 
@@ -126,7 +126,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(NEW_NAME, NEW_PRICE_IN_CENTS);
 
-        mockMvc.perform(put(REF_W_ID, itemId)
+        mockMvc.perform(put(URI_W_ID, itemId)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -143,7 +143,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
                 }
                 """.formatted(NEW_NAME, NEW_PRICE_IN_CENTS);
 
-        mockMvc.perform(put(REF_W_ID, NON_EXISTENT_ID)
+        mockMvc.perform(put(URI_W_ID, NON_EXISTENT_ID)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))
@@ -154,16 +154,16 @@ class ItemIntegrationTest extends IntegrationTestCommons {
     void deleteItem_shouldMarkItemDeleted() throws Exception {
         Long itemId = createItem(NAME, PRICE_IN_CENTS);
 
-        mockMvc.perform(delete(REF_W_ID, itemId).with(admin()))
+        mockMvc.perform(delete(URI_W_ID, itemId).with(admin()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get(REF_W_ID, itemId).with(admin()))
+        mockMvc.perform(get(URI_W_ID, itemId).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void deleteItem_shouldReturnNotFound_whenDoesNotExist() throws Exception {
-        mockMvc.perform(delete(REF_W_ID, NON_EXISTENT_ID).with(admin()))
+        mockMvc.perform(delete(URI_W_ID, NON_EXISTENT_ID).with(admin()))
                 .andExpect(status().isNotFound());
     }
 
@@ -175,7 +175,7 @@ class ItemIntegrationTest extends IntegrationTestCommons {
             }
             """.formatted(name, priceInCents);
 
-        String response = mockMvc.perform(post(REF)
+        String response = mockMvc.perform(post(URI)
                         .with(admin())
                         .contentType(APPLICATION_JSON)
                         .content(body))

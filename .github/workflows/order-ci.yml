@@ -3,7 +3,7 @@ name: CI Pipeline (orderservice)
 on:
   push:
     branches:
-      - ordr-0/epic
+      - ordr-1/epic
 
 jobs:
   build:

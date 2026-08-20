@@ -17,13 +17,13 @@ public class UserClient {
 
     private final RestTemplate restTemplate;
 
-    private static final String REF = "/api/users";
+    private static final String URI = "/api/v1/users";
     private static final String UNKNOWN = "Unknown";
 
     @CircuitBreaker(name = "userService", fallbackMethod = "getUserByIdFallback")
     public UserResponseDto getUserById(Long id) {
         return restTemplate.getForObject(
-                REF + "/{id}",
+                URI + "/{id}",
                 UserResponseDto.class,
                 id
         );
@@ -35,7 +35,7 @@ public class UserClient {
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
         return Arrays.asList(restTemplate.getForEntity(
-                REF + "/batch?ids={ids}",
+                URI + "/batch?ids={ids}",
                 UserResponseDto[].class,
                 idsParam).getBody());
     }
@@ -43,7 +43,7 @@ public class UserClient {
     @CircuitBreaker(name = "userService", fallbackMethod = "getUserByEmailFallback")
     public UserResponseDto getUserByEmail(String email) {
         return restTemplate.getForObject(
-                REF + "/email/{email}",
+                URI + "/email/{email}",
                 UserResponseDto.class,
                 email
         );

@@ -165,6 +165,18 @@ public class OrderServiceImpl implements OrderService {
         return mapResponseWithUser(orderResponseDto, userResponseDto);
     }
 
+    @Transactional
+    @CacheEvict(value = "orders", key = "#orderId")
+    public void setStatus(Long orderId, OrderStatus status){
+        log.debug("Setting order with the id={} with status={}",
+                orderId,
+                status);
+        Order order = orderRepository.findByIdAndDeletedFalse(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
     private List<OrderItem> mapOrderItems(Order order, List<OrderItemRequestDto> dtos) {
         List<Long> itemIds = dtos.stream().map(OrderItemRequestDto::itemId).toList();
         List<Item> items = itemRepository.findByIdInAndDeletedFalse(itemIds);

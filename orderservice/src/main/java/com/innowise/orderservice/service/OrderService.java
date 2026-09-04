@@ -76,4 +76,12 @@ public interface OrderService {
      * @return returns full data of the deleted order.
      */
     OrderResponseDto deleteOrderById(Long id);
+
+    /**
+     * Update order status by ID;
+     *
+     * @param orderId ID of the order to be updated;
+     * @param status new order status;
+     */
+    void setStatus(Long orderId, OrderStatus status);
 }

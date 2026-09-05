@@ -4,6 +4,8 @@ public record PaymentStatusDto(
 
         Long orderId,
 
-        String status
+        String status,
+
+        Long amount
 ) {
 }

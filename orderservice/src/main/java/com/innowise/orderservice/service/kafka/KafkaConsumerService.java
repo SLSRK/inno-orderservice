@@ -21,7 +21,7 @@ public class KafkaConsumerService {
     )
     public void consume(PaymentStatusDto message) {
         if ("SUCCESS".equals(message.status())) {
-            orderService.setStatus(message.orderId(), OrderStatus.PAID);
+            orderService.setStatus(message);
         }
     }
 }

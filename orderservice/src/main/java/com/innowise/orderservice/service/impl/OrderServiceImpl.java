@@ -2,11 +2,13 @@ package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.exception.NotFoundException;
+import com.innowise.orderservice.exception.PaymentException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateDto;
 import com.innowise.orderservice.model.dto.OrderItemRequestDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateDto;
+import com.innowise.orderservice.model.dto.PaymentStatusDto;
 import com.innowise.orderservice.model.dto.UserResponseDto;
 import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.Order;
@@ -166,14 +168,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
-    @CacheEvict(value = "orders", key = "#orderId")
-    public void setStatus(Long orderId, OrderStatus status){
-        log.debug("Setting order with the id={} with status={}",
-                orderId,
-                status);
-        Order order = orderRepository.findByIdAndDeletedFalse(orderId)
+    @CacheEvict(value = "orders", allEntries = true)
+    public void setStatus(PaymentStatusDto message){
+        log.debug("Setting order with the id={} and amount with status={}",
+                message.orderId(),
+                message.status());
+        Order order = orderRepository.findByIdAndDeletedFalse(message.orderId())
                 .orElseThrow(() -> new NotFoundException("Order not found"));
-        order.setStatus(status);
+        if(message.amount() >= order.getTotalPrice()) {
+            order.setStatus(OrderStatus.PAID);
+        }
+        else {
+            throw new PaymentException("Payment amount is not enough");
+        }
         orderRepository.save(order);
     }
 

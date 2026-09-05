@@ -3,6 +3,7 @@ package com.innowise.orderservice.service;
 import com.innowise.orderservice.model.dto.OrderCreateDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateDto;
+import com.innowise.orderservice.model.dto.PaymentStatusDto;
 import com.innowise.orderservice.model.entity.OrderStatus;
 import org.springframework.data.domain.Page;
 
@@ -80,8 +81,7 @@ public interface OrderService {
     /**
      * Update order status by ID;
      *
-     * @param orderId ID of the order to be updated;
-     * @param status new order status;
+     * @param message payment data of the order;
      */
-    void setStatus(Long orderId, OrderStatus status);
+    void setStatus(PaymentStatusDto message);
 }

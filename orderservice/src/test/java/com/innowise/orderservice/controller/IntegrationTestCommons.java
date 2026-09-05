@@ -35,7 +35,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
         OrderserviceApplication.class,
         IntegrationTestCommons.TestCacheConfig.class
 },
-        properties = "jwt.secret=jwt-secret-for-test-JzdWIiOiI1Iiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3ODU3NTM1MjAsImV4cC")
+        properties = {
+                "jwt.secret=jwt-secret-for-test-JzdWIiOiI1Iiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3ODU3NTM1MjAsImV4cC",
+                "spring.kafka.bootstrap-servers=localhost:9092",
+                "spring.kafka.listener.auto-startup=false"
+        })
 @AutoConfigureMockMvc
 public abstract class IntegrationTestCommons {
 

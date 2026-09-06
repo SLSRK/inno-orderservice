@@ -2,7 +2,6 @@ package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.exception.NotFoundException;
-import com.innowise.orderservice.exception.PaymentException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateDto;
 import com.innowise.orderservice.model.dto.OrderItemRequestDto;
@@ -177,11 +176,12 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         if(message.amount() >= order.getTotalPrice()) {
             order.setStatus(OrderStatus.PAID);
+            orderRepository.save(order);
         }
         else {
-            throw new PaymentException("Payment amount is not enough");
+            log.info("Payment for the order with the id={} failed, because the amount is not enough",
+                    message.orderId());
         }
-        orderRepository.save(order);
     }
 
     private List<OrderItem> mapOrderItems(Order order, List<OrderItemRequestDto> dtos) {

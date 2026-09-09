@@ -169,9 +169,9 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @CacheEvict(value = "orders", allEntries = true)
     public void setStatus(PaymentStatusDto message){
-        log.debug("Setting order with the id={} and amount with status={}",
+        log.debug("Setting order with the id={} and amount={}",
                 message.orderId(),
-                message.status());
+                message.amount());
         Order order = orderRepository.findByIdAndDeletedFalse(message.orderId())
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         if(message.amount() >= order.getTotalPrice()) {

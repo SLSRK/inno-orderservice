@@ -20,8 +20,6 @@ public class KafkaConsumerService {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consume(PaymentStatusDto message) {
-        if ("SUCCESS".equals(message.status())) {
-            orderService.setStatus(message);
-        }
+        orderService.setStatus(message);
     }
 }

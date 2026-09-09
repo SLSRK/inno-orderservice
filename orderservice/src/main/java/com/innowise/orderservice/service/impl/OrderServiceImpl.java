@@ -7,6 +7,7 @@ import com.innowise.orderservice.model.dto.OrderCreateDto;
 import com.innowise.orderservice.model.dto.OrderItemRequestDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateDto;
+import com.innowise.orderservice.model.dto.PaymentStatusDto;
 import com.innowise.orderservice.model.dto.UserResponseDto;
 import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.Order;
@@ -163,6 +164,24 @@ public class OrderServiceImpl implements OrderService {
         order.setDeleted(true);
         OrderResponseDto orderResponseDto = orderMapper.toDto(orderRepository.save(order));
         return mapResponseWithUser(orderResponseDto, userResponseDto);
+    }
+
+    @Transactional
+    @CacheEvict(value = "orders", allEntries = true)
+    public void setStatus(PaymentStatusDto message){
+        log.debug("Setting order with the id={} and amount={}",
+                message.orderId(),
+                message.amount());
+        Order order = orderRepository.findByIdAndDeletedFalse(message.orderId())
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        if(message.amount() >= order.getTotalPrice()) {
+            order.setStatus(OrderStatus.PAID);
+            orderRepository.save(order);
+        }
+        else {
+            log.info("Payment for the order with the id={} failed, because the amount is not enough",
+                    message.orderId());
+        }
     }
 
     private List<OrderItem> mapOrderItems(Order order, List<OrderItemRequestDto> dtos) {

@@ -3,6 +3,7 @@ package com.innowise.orderservice.service;
 import com.innowise.orderservice.model.dto.OrderCreateDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateDto;
+import com.innowise.orderservice.model.dto.PaymentStatusDto;
 import com.innowise.orderservice.model.entity.OrderStatus;
 import org.springframework.data.domain.Page;
 
@@ -76,4 +77,11 @@ public interface OrderService {
      * @return returns full data of the deleted order.
      */
     OrderResponseDto deleteOrderById(Long id);
+
+    /**
+     * Update order status by ID;
+     *
+     * @param message payment data of the order;
+     */
+    void setStatus(PaymentStatusDto message);
 }
